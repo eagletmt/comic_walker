@@ -8,7 +8,7 @@ module ComicWalker
     end
 
     def decode(b64)
-      JSON.parse(Client::Unknown.dea0qData_(@key, b64))
+      JSON.parse(Client::Unknown.decrypt_b64(@key, b64))
     end
   end
 end

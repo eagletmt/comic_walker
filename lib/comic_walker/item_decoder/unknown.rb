@@ -5,10 +5,9 @@ module ComicWalker
 
       # @param [String] Base64-encoded encrypted data
       # @return [Array<Array<Fixnum>>] Chunked encrypted data
-      def a5R(a)
-        a.scan(/.{1,65536}/).map do |chunk|
-          Base64.decode64(chunk).unpack('C*')
-        end
+      CHUNK_SIZE = 65536 / 4 * 3
+      def split_encrypted_data(a)
+        Base64.decode64(a).unpack('C*').each_slice(CHUNK_SIZE).to_a
       end
 
       # @param [Array<Array<Fixnum>>] Chunked encrypted data
@@ -18,10 +17,10 @@ module ComicWalker
       # @param [Integer] bsize block size?
       # @param [Integer] hsize size?
       # @return [Array<Array<Fixnum>>] Chunked decrypted data
-      def dea0q_(chunks, key1, key2, key3, bsize, hsize)
+      def decrypt(chunks, key1, key2, key3, bsize, hsize)
         offset = 0
         chunks.each do |chunk|
-          a0f(key3, chunk, offset)
+          func1(key3, chunk, offset)
           offset += chunk.size
         end
 
@@ -35,7 +34,7 @@ module ComicWalker
           i -= chunk.size
         end
 
-        c = a0g(s, key2)
+        c = func2(s, key2)
         i = 0
         j = 0
         chunks.each do |chunk|
@@ -46,20 +45,20 @@ module ComicWalker
           end
           i -= chunk.size
         end
-        a0e(key1, chunks[0], hsize)
+        func3(key1, chunks[0], hsize)
         chunks
       end
 
       # @param [String] key
       # @param [Array<Fixnum>] chunk Encrypted data slice
       # @return [nil] Modify the given chunk
-      def a0e(key, chunk, hsize)
+      def func3(key, chunk, hsize)
         hsize = [hsize, chunk.size].min
         ary1 = Array.new(hsize)
         hsize.times do |i|
           ary1[i] = chunk[i]
         end
-        ary2 = a0g(ary1, key)
+        ary2 = func2(ary1, key)
         hsize.times do |i|
           chunk[i] = ary2[i]
         end
@@ -68,9 +67,9 @@ module ComicWalker
       # @param [Array<Fixnum>] ary binary data?
       # @param [String] key key?
       # @return [Array<Fixnum>]
-      def a0g(ary, key)
+      def func2(ary, key)
         ary1 = Array.new(ary.size)
-        tbl = a0F(key)
+        tbl = gen_table(key)
         d = 0
         e = 0
         ary.size.times do |i|
@@ -87,8 +86,8 @@ module ComicWalker
       # @param [Array<Fixnum>] buf Encrypted data slice
       # @param [Integer] offset offset?
       # @return [nil] Modify the given buf
-      def a0f(key, buf, offset)
-        d = a0F(key)
+      def func1(key, buf, offset)
+        d = gen_table(key)
         buf.size.times do |i|
           buf[i] ^= d[(i + offset) % 256]
         end
@@ -96,7 +95,7 @@ module ComicWalker
 
       # @param [String] key key?
       # @return [Array<Fixnum>] Some table
-      def a0F(key)
+      def gen_table(key)
         e = []
         d = []
         256.times do |i|

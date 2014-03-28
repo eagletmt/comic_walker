@@ -15,7 +15,7 @@ module ComicWalker
       u1 = get_u1(cid)
       json = get_li(cid, u1)
       license_b64 = json['license']
-      License.new(JSON.parse(Unknown.a0l(@bid, u1, license_b64)))
+      License.new(JSON.parse(Unknown.decrypt_license(@bid, u1, license_b64)))
     end
 
     def get_u1(cid)
