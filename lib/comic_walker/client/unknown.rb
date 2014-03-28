@@ -1,5 +1,6 @@
 require 'base64'
 require 'digest'
+require 'openssl'
 
 module ComicWalker
   class Client
@@ -29,24 +30,18 @@ module ComicWalker
         data = Base64.decode64(b64data).unpack('C*')
         md5 = Digest::MD5.hexdigest((key + data.slice(8, 8)).pack('C*'))
         l = md5.scan(/.{2}/).map { |xy| Integer(xy, 16) }
-        decrypt_data(data[16 .. -1], l).pack('U*')
+        decrypt_data(data[16 .. -1], l)
       end
 
       # Decode data
       # @param [Array<Fixnum>] data
       # @param [Array<Fixnum>] key
-      # @return [Array<Fixnum>] Decoded data
+      # @return [String] Decoded data
       def decrypt_data(data, key)
-        tbl = gen_table(key)
-        d = 0
-        e = 0
-        data.map do |x|
-          e = (e + 1) % 256
-          d = (d + tbl[e]) % 256
-          tbl[e], tbl[d] = tbl[d], tbl[e]
-          c = (tbl[e] + tbl[d]) % 256
-          x ^ tbl[c]
-        end
+        dec = OpenSSL::Cipher.new('RC4')
+        dec.decrypt
+        dec.key = key.pack('C*')
+        dec.update(data.pack('C*')) + dec.final
       end
 
       # @param [Array<Fixnum>] key
