@@ -1,3 +1,5 @@
+require 'comic_walker/client/unknown'
+
 module ComicWalker
   class ItemDecoder
     module Unknown
@@ -96,20 +98,7 @@ module ComicWalker
       # @param [String] key key?
       # @return [Array<Fixnum>] Some table
       def gen_table(key)
-        e = []
-        d = []
-        256.times do |i|
-          e[i] = i
-        end
-        256.times do |i|
-          d[i] = key[i % key.size].ord
-        end
-        a = 0
-        256.times do |i|
-          a = (a + e[i] + d[i]) & 0xff
-          e[i], e[a] = e[a], e[i]
-        end
-        e
+        Client::Unknown.gen_table(key.unpack('U*'))
       end
 
       # Calculate moves.

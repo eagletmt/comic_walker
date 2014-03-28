@@ -34,7 +34,7 @@ module ComicWalker
 
       # Decode data
       # @param [Array<Fixnum>] data
-      # @param [String] key
+      # @param [Array<Fixnum>] key
       # @return [Array<Fixnum>] Decoded data
       def decrypt_data(data, key)
         tbl = gen_table(key)
@@ -49,7 +49,7 @@ module ComicWalker
         end
       end
 
-      # @param [String] key
+      # @param [Array<Fixnum>] key
       # @return [Array<Fixnum>] Some table
       def gen_table(key)
         e = []
