@@ -16,36 +16,34 @@ module ComicWalker
         dea0qData_(h + A1B, license_b64)
       end
 
-      def dea0qData_(a, license_b64)
-        license_bin = Base64.decode64(license_b64).unpack('C*')
-        md5 = Digest::MD5.hexdigest((a + license_bin.slice(8, 8)).pack('C*'))
-        l = md5.chars.each_slice(2).map do |x, y|
-          Integer(x + y, 16)
-        end
-        a0gBin(license_bin[16 .. -1], l).pack('U*')
+      def dea0qData_(key, b64data)
+        data = Base64.decode64(b64data).unpack('C*')
+        md5 = Digest::MD5.hexdigest((key + data.slice(8, 8)).pack('C*'))
+        l = md5.scan(/.{2}/).map { |xy| Integer(xy, 16) }
+        a0gBin(data[16 .. -1], l).pack('U*')
       end
 
-      def a0gBin(a, b)
-        h = a0Fbin(b)
+      def a0gBin(data, key)
+        tbl = a0Fbin(key)
         d = 0
         e = 0
-        a.size.times.map do |k|
+        data.map do |x|
           e = (e + 1) % 256
-          d = (d + h[e]) % 256
-          h[e], h[d] = h[d], h[e]
-          c = (h[e] + h[d]) % 256
-          a[k] ^ h[c]
+          d = (d + tbl[e]) % 256
+          tbl[e], tbl[d] = tbl[d], tbl[e]
+          c = (tbl[e] + tbl[d]) % 256
+          x ^ tbl[c]
         end
       end
 
-      def a0Fbin(a)
+      def a0Fbin(key)
         e = []
         d = []
         256.times do |b|
           e[b] = b
         end
         256.times do |b|
-          d[b] = a[b % a.size]
+          d[b] = key[b % key.size]
         end
         a = 0
         256.times do |b|
