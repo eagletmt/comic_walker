@@ -3,57 +3,45 @@ module ComicWalker
     module Unknown
       module_function
 
-      # @param [String] Base64-encoded encrypted data
-      # @param [String] key3 key?
-      # @return [Array<Array<Fixnum>>] Chunked encrypted data
-      CHUNK_SIZE = 65536 / 4 * 3
-      def split_encrypted_data(a, key3)
-        bytes = Base64.decode64(a).unpack('C*')
-        func1(key3, bytes).each_slice(CHUNK_SIZE).to_a
-      end
-
-      # @param [Array<Array<Fixnum>>] Chunked encrypted data
+      # @param [String] key
+      # @param [Array<Fixnum>] data Encrypted data
       # @param [Integer] bsize block size?
-      # @return [Array<Array<Fixnum>>] Chunked decrypted data
-      def decrypt(chunks, key, bsize)
+      # @return [Array<Fixnum>] Chunked decrypted data
+      def decrypt(key, data, bsize)
         s = []
-        chunks.each do |chunk|
-          0.step(chunk.size-1, bsize) do |i|
-            s << chunk[i]
-          end
+        0.step(data.size-1, bsize) do |i|
+          s << data[i]
         end
 
-        c = func2(s, key)
+        c = func2(key, s)
         # s.size == c.size
 
-        chunks.each do |chunk|
-          0.step(chunk.size-1, bsize) do |i|
-            chunk[i] = c.shift
-          end
+        0.step(data.size-1, bsize) do |i|
+          data[i] = c.shift
         end
-        chunks
+        data
       end
 
       # @param [String] key
-      # @param [Array<Fixnum>] chunk Encrypted data slice
+      # @param [Array<Fixnum>] data Encrypted data
       # @param [Integer] hsize header size?
-      # @return [nil] Modify the given chunk
-      def func3(key, chunk, hsize)
-        hsize = [hsize, chunk.size].min
-        func2(chunk.slice(0, hsize), key).each.with_index do |x, i|
-          chunk[i] = x
+      # @return [nil] Modify the given data
+      def func3(key, data, hsize)
+        hsize = [hsize, data.size].min
+        func2(key, data.slice(0, hsize)).each.with_index do |x, i|
+          data[i] = x
         end
       end
 
-      # @param [Array<Fixnum>] ary binary data?
-      # @param [String] key key?
+      # @param [String] key
+      # @param [Array<Fixnum>] data
       # @return [Array<Fixnum>]
-      def func2(ary, key)
+      def func2(key, data)
         # RC4?
         tbl = gen_table(key)
         i = 0
         j = 0
-        ary.map do |x|
+        data.map do |x|
           i = (i + 1) % 256
           j = (j + tbl[i]) % 256
           tbl[i], tbl[j] = tbl[j], tbl[i]
@@ -63,11 +51,11 @@ module ComicWalker
       end
 
       # @param [String] key key?
-      # @param [Array<Fixnum>] bytes Encrypted data
+      # @param [Array<Fixnum>] data Encrypted data
       # @return [Array<Fixnum>]
-      def func1(key, bytes)
+      def func1(key, data)
         d = gen_table(key)
-        bytes.map.with_index do |b, i|
+        data.map.with_index do |b, i|
           b ^ d[i % 256]
         end
       end
