@@ -3,12 +3,21 @@ module ComicWalker
     module Unknown
       module_function
 
+      # @param [String] Base64-encoded encrypted data
+      # @return [Array<Array<Fixnum>>] Chunked encrypted data
       def a5R(a)
         a.scan(/.{1,65536}/).map do |chunk|
           Base64.decode64(chunk).unpack('C*')
         end
       end
 
+      # @param [Array<Array<Fixnum>>] Chunked encrypted data
+      # @param [String] key1 key?
+      # @param [String] key2 key?
+      # @param [String] key3 key?
+      # @param [Integer] bsize block size?
+      # @param [Integer] hsize size?
+      # @return [Array<Array<Fixnum>>] Chunked decrypted data
       def dea0q_(chunks, key1, key2, key3, bsize, hsize)
         offset = 0
         chunks.each do |chunk|
@@ -41,6 +50,9 @@ module ComicWalker
         chunks
       end
 
+      # @param [String] key
+      # @param [Array<Fixnum>] chunk Encrypted data slice
+      # @return [nil] Modify the given chunk
       def a0e(key, chunk, hsize)
         hsize = [hsize, chunk.size].min
         ary1 = Array.new(hsize)
@@ -53,6 +65,9 @@ module ComicWalker
         end
       end
 
+      # @param [Array<Fixnum>] ary binary data?
+      # @param [String] key key?
+      # @return [Array<Fixnum>]
       def a0g(ary, key)
         ary1 = Array.new(ary.size)
         tbl = a0F(key)
@@ -68,14 +83,19 @@ module ComicWalker
         ary1
       end
 
+      # @param [String] key key?
+      # @param [Array<Fixnum>] buf Encrypted data slice
+      # @param [Integer] offset offset?
+      # @return [nil] Modify the given buf
       def a0f(key, buf, offset)
         d = a0F(key)
         buf.size.times do |i|
           buf[i] ^= d[(i + offset) % 256]
         end
-        buf
       end
 
+      # @param [String] key key?
+      # @return [Array<Fixnum>] Some table
       def a0F(key)
         e = []
         d = []
@@ -93,6 +113,13 @@ module ComicWalker
         e
       end
 
+      # Calculate moves.
+      # @param [Integer] width Width of the image
+      # @param [Integer] height Height of the image
+      # @param [Integer] rect_width Width of the sub-image
+      # @param [Integer] rect_height Height of the sub-image
+      # @param [Integer] pattern pattern? integer ranging from 1 to 4
+      # @return [Array<Hash>] List of hash that represents a move
       def calculate_moves(width, height, rect_width, rect_height, pattern)
         wcnt = width / rect_width
         hcnt = height / rect_height
@@ -158,14 +185,29 @@ module ComicWalker
         moves
       end
 
+      # @param [Integer] a
+      # @param [Integer] f
+      # @param [Integer] b
+      # @param [Integer] e
+      # @return [Integer]
       def calcPositionWithRest_(a, f, b, e)
         a * e + (a >= f ? b : 0)
       end
 
+      # @param [Integer] a
+      # @param [Integer] f
+      # @param [Integer] b
+      # @return [Integer]
       def calcXCoordinateXRest_(a, f, b)
         (a + 61 * b) % f
       end
 
+      # @param [Integer] a
+      # @param [Integer] f
+      # @param [Integer] b
+      # @param [Integer] e
+      # @param [Integer] d
+      # @return [Integer]
       def calcYCoordinateXRest_(a, f, b, e, d)
         c = 1 == d % 2
         if a < f ? c : !c
@@ -178,6 +220,12 @@ module ComicWalker
         (a + 53*d + 59*b) % e + f
       end
 
+      # @param [Integer] a
+      # @param [Integer] f
+      # @param [Integer] b
+      # @param [Integer] e
+      # @param [Integer] d
+      # @return [Integer]
       def calcXCoordinateYRest_(a, f, b, e, d)
         c = 1 == d % 2
         if a < b ? c : !c
@@ -190,6 +238,10 @@ module ComicWalker
         (a + 67*d + f + 71) % e + b
       end
 
+      # @param [Integer] a
+      # @param [Integer] f
+      # @param [Integer] b
+      # @return [Integer]
       def calcYCoordinateYRest_(a, f, b)
         (a + 73*b) % f
       end

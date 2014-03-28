@@ -8,14 +8,23 @@ module ComicWalker
 
       A1B = [173, 43, 117, 127, 230, 58, 73, 84, 154, 177, 47, 81, 108, 200, 101, 65]
 
-      def a0l(bid, s, license_b64)
+      # Decode Base64-encoded license object
+      # @param [String] bid browser id
+      # @param [String] u1 got from cookie
+      # @param [String] license_b64 Base64-encoded license object
+      # @return [String]
+      def a0l(bid, u1, license_b64)
         h = bid.chars.map(&:ord)
-        if s
-          h += s.chars.map(&:ord)
+        if u1
+          h += u1.chars.map(&:ord)
         end
         dea0qData_(h + A1B, license_b64)
       end
 
+      # Decode Base64-encoded data
+      # @param [String] key key?
+      # @param [String] b64data Base64-encoded data
+      # @return [String]
       def dea0qData_(key, b64data)
         data = Base64.decode64(b64data).unpack('C*')
         md5 = Digest::MD5.hexdigest((key + data.slice(8, 8)).pack('C*'))
@@ -23,6 +32,10 @@ module ComicWalker
         a0gBin(data[16 .. -1], l).pack('U*')
       end
 
+      # Decode data
+      # @param [Array<Fixnum>] data
+      # @param [String] key
+      # @return [Array<Fixnum>] Decoded data
       def a0gBin(data, key)
         tbl = a0Fbin(key)
         d = 0
@@ -36,6 +49,8 @@ module ComicWalker
         end
       end
 
+      # @param [String] key
+      # @return [Array<Fixnum>] Some table
       def a0Fbin(key)
         e = []
         d = []
