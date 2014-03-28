@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = ComicWalker::VERSION
   spec.authors       = ["Kohei Suzuki"]
   spec.email         = ["eagletmt@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.summary       = %q{Client library for ComicWalker}
+  spec.description   = %q{Client library for ComicWalker}
+  spec.homepage      = "https://github.com/eagletmt/comic_walker"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -18,6 +18,10 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.6"
+  spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
+  spec.add_dependency "addressable"
+  spec.add_dependency "http-cookie"
+  spec.add_dependency "rmagick"
+  spec.add_dependency "rubyzip"
 end
