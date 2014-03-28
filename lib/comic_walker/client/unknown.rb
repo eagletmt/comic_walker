@@ -43,25 +43,6 @@ module ComicWalker
         dec.key = key.pack('C*')
         dec.update(data.pack('C*')) + dec.final
       end
-
-      # @param [Array<Fixnum>] key
-      # @return [Array<Fixnum>] Some table
-      def gen_table(key)
-        e = []
-        d = []
-        256.times do |b|
-          e[b] = b
-        end
-        256.times do |b|
-          d[b] = key[b % key.size]
-        end
-        a = 0
-        256.times do |b|
-          a = (a + e[b] + d[b]) % 256
-          e[b], e[a] = e[a], e[b]
-        end
-        e
-      end
     end
   end
 end

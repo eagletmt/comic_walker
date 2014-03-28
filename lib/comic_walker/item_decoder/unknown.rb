@@ -98,7 +98,21 @@ module ComicWalker
       # @param [String] key key?
       # @return [Array<Fixnum>] Some table
       def gen_table(key)
-        Client::Unknown.gen_table(key.unpack('U*'))
+        key = key.unpack('U*')
+        e = []
+        d = []
+        256.times do |b|
+          e[b] = b
+        end
+        256.times do |b|
+          d[b] = key[b % key.size]
+        end
+        a = 0
+        256.times do |b|
+          a = (a + e[b] + d[b]) % 256
+          e[b], e[a] = e[a], e[b]
+        end
+        e
       end
 
       # Calculate moves.
