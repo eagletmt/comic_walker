@@ -7,9 +7,19 @@ module ComicWalker
 
       # @param [Array<Fixnum>] key
       # @param [Array<Fixnum>] data Encrypted data
+      # @return [Array<Fixnum>]
+      def prepare(key, data)
+        s = Cipher.gen_rc4_table(key)
+        data.map.with_index do |b, i|
+          b ^ s[i % 256]
+        end
+      end
+
+      # @param [Array<Fixnum>] key
       # @param [Integer] bsize block size?
+      # @param [Array<Fixnum>] data Encrypted data
       # @return [Array<Fixnum>] Chunked decrypted data
-      def decrypt(key, data, bsize)
+      def decrypt(key, bsize, data)
         s = []
         0.step(data.size-1, bsize) do |i|
           s << data[i]
@@ -25,24 +35,15 @@ module ComicWalker
       end
 
       # @param [Array<Fixnum>] key
-      # @param [Array<Fixnum>] data Encrypted data
       # @param [Integer] hsize header size?
-      # @return [nil] Modify the given data
-      def func3(key, data, hsize)
+      # @param [Array<Fixnum>] data Encrypted data
+      # @return [Array<Fixnum>] data
+      def finish(key, hsize, data)
         hsize = [hsize, data.size].min
         Cipher.decrypt_rc4(key, data.slice(0, hsize)).each.with_index do |x, i|
           data[i] = x
         end
-      end
-
-      # @param [Array<Fixnum>] key
-      # @param [Array<Fixnum>] data Encrypted data
-      # @return [Array<Fixnum>]
-      def func1(key, data)
-        s = Cipher.gen_rc4_table(key)
-        data.map.with_index do |b, i|
-          b ^ s[i % 256]
-        end
+        data
       end
 
       # Calculate moves.

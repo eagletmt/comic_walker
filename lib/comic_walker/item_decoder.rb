@@ -16,11 +16,13 @@ module ComicWalker
     def decode(dat_path, img_path, b64data)
       bs = 128
       hs = 1024
-      data1 = Base64.decode64(b64data).unpack('C*')
-      data2 = Unknown.func1(@key3, data1)
-      data3 = Unknown.decrypt(@key2, data2, bs)
-      Unknown.func3(@key1, data3, hs)
-      blob = data3.pack('C*')
+      blob = Unknown.finish(@key1, hs,
+        Unknown.decrypt(@key2, bs,
+          Unknown.prepare(@key3,
+            Base64.decode64(b64data).unpack('C*')
+          )
+        )
+      ).pack('C*')
 
       src = Magick::Image.from_blob(blob).first
       width = src.columns
