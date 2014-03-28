@@ -1,6 +1,8 @@
 require 'json'
 require 'pathname'
+require 'pp'
 require 'comic_walker/client'
+require 'comic_walker/end_layer_decoder'
 require 'comic_walker/item_decoder'
 
 module ComicWalker
@@ -30,6 +32,8 @@ module ComicWalker
             config['configuration']['contents'].each do |content|
               pages[content['index']-1] = content['file']
             end
+          when /end_layer\.json/
+            pp EndLayerDecoder.new(license.key).decode(zip.read)
           when %r{\Aitem/}
             items[entry.name] = zip.read
           end

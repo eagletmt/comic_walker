@@ -1,4 +1,5 @@
 require 'addressable/uri'
+require 'base64'
 require 'net/http'
 require 'zip'
 
@@ -19,6 +20,10 @@ module ComicWalker
 
       def info_url
         agreement['url_prefix'] + agreement['info_file_name']
+      end
+
+      def key
+        Base64.decode64(agreement['key']).unpack('C*')
       end
 
       def with_jar(&block)
