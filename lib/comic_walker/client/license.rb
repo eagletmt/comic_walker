@@ -23,7 +23,7 @@ module ComicWalker
       end
 
       def key
-        Base64.decode64(agreement['key']).unpack('C*')
+        Base64.decode64(agreement['key'])
       end
 
       def with_jar(&block)

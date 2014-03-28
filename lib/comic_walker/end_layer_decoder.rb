@@ -1,5 +1,5 @@
 require 'json'
-require 'comic_walker/client/unknown'
+require 'comic_walker/cipher'
 
 module ComicWalker
   class EndLayerDecoder
@@ -8,7 +8,7 @@ module ComicWalker
     end
 
     def decode(b64)
-      JSON.parse(Client::Unknown.decrypt_b64(@key, b64))
+      JSON.parse(Client::Cipher.decrypt_b64(@key, b64))
     end
   end
 end

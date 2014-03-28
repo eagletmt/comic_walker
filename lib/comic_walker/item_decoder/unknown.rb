@@ -1,5 +1,3 @@
-require 'comic_walker/client/unknown'
-
 module ComicWalker
   class ItemDecoder
     module Unknown
