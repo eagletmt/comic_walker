@@ -19,21 +19,28 @@ module ComicWalker
       title = info['issues'].first['content_name']
 
       license.with_jar do |zip|
+        pages = []
         items = {}
         decoder = nil
         while entry = zip.get_next_entry
           case entry.name
           when 'configuration_pack.json'
-            decoder = ItemDecoder.new(JSON.parse(zip.read))
+            config = JSON.parse(zip.read)
+            decoder = ItemDecoder.new(config)
+            config['configuration']['contents'].each do |content|
+              pages[content['index']-1] = content['file']
+            end
           when %r{\Aitem/}
             items[entry.name] = zip.read
           end
         end
 
         img_dir = Pathname.new(title).join(cid).tap(&:mkpath)
-        items.each do |dat_path, data|
-          dat_path = Pathname.new(dat_path)
-          img_path = img_dir.join(dat_path.parent.basename.sub_ext('.jpg'))
+        pages.each.with_index do |file, i|
+          dat_path = Pathname.new(file).join('0.dat')
+          data = items[dat_path.to_s]
+          img_fname = dat_path.parent.basename.sub_ext('.jpg')
+          img_path = img_dir.join(sprintf('%03d_%s', i, img_fname))
           puts "#{dat_path} -> #{img_path}"
           decoder.decode(dat_path, img_path, data)
         end
