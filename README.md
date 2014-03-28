@@ -21,6 +21,7 @@ Or install it yourself as:
 ### CLI
 
 ```
+% comic-walker KDCW_KS04000001010001_68
 item/xhtml/p-cover.xhtml/0.dat -> Ｆａｔｅ／ｋａｌｅｉｄ　ｌｉｎｅｒ　プリズマ☆イリヤ　ドライ！！/KDCW_KS04000001010001_68/000_p-cover.jpg
 item/xhtml/p-001.xhtml/0.dat -> Ｆａｔｅ／ｋａｌｅｉｄ　ｌｉｎｅｒ　プリズマ☆イリヤ　ドライ！！/KDCW_KS04000001010001_68/001_p-001.jpg
 item/xhtml/p-002.xhtml/0.dat -> Ｆａｔｅ／ｋａｌｅｉｄ　ｌｉｎｅｒ　プリズマ☆イリヤ　ドライ！！/KDCW_KS04000001010001_68/002_p-002.jpg
