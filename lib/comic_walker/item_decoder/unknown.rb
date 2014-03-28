@@ -4,26 +4,21 @@ module ComicWalker
       module_function
 
       # @param [String] Base64-encoded encrypted data
+      # @param [String] key3 key?
       # @return [Array<Array<Fixnum>>] Chunked encrypted data
       CHUNK_SIZE = 65536 / 4 * 3
-      def split_encrypted_data(a)
-        Base64.decode64(a).unpack('C*').each_slice(CHUNK_SIZE).to_a
+      def split_encrypted_data(a, key3)
+        bytes = Base64.decode64(a).unpack('C*')
+        func1(key3, bytes).each_slice(CHUNK_SIZE).to_a
       end
 
       # @param [Array<Array<Fixnum>>] Chunked encrypted data
       # @param [String] key1 key?
       # @param [String] key2 key?
-      # @param [String] key3 key?
       # @param [Integer] bsize block size?
       # @param [Integer] hsize size?
       # @return [Array<Array<Fixnum>>] Chunked decrypted data
-      def decrypt(chunks, key1, key2, key3, bsize, hsize)
-        offset = 0
-        chunks.each do |chunk|
-          func1(key3, chunk, offset)
-          offset += chunk.size
-        end
-
+      def decrypt(chunks, key1, key2, bsize, hsize)
         s = []
         i = 0
         chunks.each do |chunk|
@@ -83,13 +78,12 @@ module ComicWalker
       end
 
       # @param [String] key key?
-      # @param [Array<Fixnum>] buf Encrypted data slice
-      # @param [Integer] offset offset?
-      # @return [nil] Modify the given buf
-      def func1(key, buf, offset)
+      # @param [Array<Fixnum>] bytes Encrypted data
+      # @return [Array<Fixnum>]
+      def func1(key, bytes)
         d = gen_table(key)
-        buf.size.times do |i|
-          buf[i] ^= d[(i + offset) % 256]
+        bytes.map.with_index do |b, i|
+          b ^ d[i % 256]
         end
       end
 
