@@ -16,29 +16,23 @@ module ComicWalker
       # @param [String] key1 key?
       # @param [String] key2 key?
       # @param [Integer] bsize block size?
-      # @param [Integer] hsize size?
+      # @param [Integer] hsize header size?
       # @return [Array<Array<Fixnum>>] Chunked decrypted data
       def decrypt(chunks, key1, key2, bsize, hsize)
         s = []
-        i = 0
         chunks.each do |chunk|
-          while i < chunk.size
+          0.step(chunk.size-1, bsize) do |i|
             s << chunk[i]
-            i += bsize
           end
-          i -= chunk.size
         end
 
         c = func2(s, key2)
-        i = 0
-        j = 0
+        # s.size == c.size
+
         chunks.each do |chunk|
-          while i < chunk.size
-            chunk[i] = c[j]
-            j += 1
-            i += bsize
+          0.step(chunk.size-1, bsize) do |i|
+            chunk[i] = c.shift
           end
-          i -= chunk.size
         end
         func3(key1, chunks[0], hsize)
         chunks
@@ -49,13 +43,8 @@ module ComicWalker
       # @return [nil] Modify the given chunk
       def func3(key, chunk, hsize)
         hsize = [hsize, chunk.size].min
-        ary1 = Array.new(hsize)
-        hsize.times do |i|
-          ary1[i] = chunk[i]
-        end
-        ary2 = func2(ary1, key)
-        hsize.times do |i|
-          chunk[i] = ary2[i]
+        func2(chunk.slice(0, hsize), key).each.with_index do |x, i|
+          chunk[i] = x
         end
       end
 
@@ -63,18 +52,17 @@ module ComicWalker
       # @param [String] key key?
       # @return [Array<Fixnum>]
       def func2(ary, key)
-        ary1 = Array.new(ary.size)
+        # RC4?
         tbl = gen_table(key)
-        d = 0
-        e = 0
-        ary.size.times do |i|
-          e = (e + 1) % 256
-          d = (d + tbl[e]) % 256
-          tbl[e], tbl[d] = tbl[d], tbl[e]
-          c = (tbl[e] + tbl[d]) % 256
-          ary1[i] = ary[i] ^ tbl[c]
+        i = 0
+        j = 0
+        ary.map do |x|
+          i = (i + 1) % 256
+          j = (j + tbl[i]) % 256
+          tbl[i], tbl[j] = tbl[j], tbl[i]
+          c = (tbl[i] + tbl[j]) % 256
+          x ^ tbl[c]
         end
-        ary1
       end
 
       # @param [String] key key?
@@ -90,7 +78,7 @@ module ComicWalker
       # @param [String] key key?
       # @return [Array<Fixnum>] Some table
       def gen_table(key)
-        key = key.unpack('U*')
+        key = key.unpack('C*')
         e = []
         d = []
         256.times do |b|
