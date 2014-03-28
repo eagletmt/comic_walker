@@ -16,7 +16,9 @@ module ComicWalker
     def decode(dat_path, img_path, data)
       bs = 128
       hs = 1024
-      chunks = Unknown.decrypt(Unknown.split_encrypted_data(data, @key3), @key1, @key2, bs, hs)
+      x1 = Unknown.split_encrypted_data(data, @key3)
+      chunks = Unknown.decrypt(x1, @key2, bs)
+      Unknown.func3(@key1, chunks[0], hs)
       blob = chunks.map { |x| x.pack('C*') }.join('')
 
       src = Magick::Image.from_blob(blob).first

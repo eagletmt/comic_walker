@@ -13,12 +13,9 @@ module ComicWalker
       end
 
       # @param [Array<Array<Fixnum>>] Chunked encrypted data
-      # @param [String] key1 key?
-      # @param [String] key2 key?
       # @param [Integer] bsize block size?
-      # @param [Integer] hsize header size?
       # @return [Array<Array<Fixnum>>] Chunked decrypted data
-      def decrypt(chunks, key1, key2, bsize, hsize)
+      def decrypt(chunks, key, bsize)
         s = []
         chunks.each do |chunk|
           0.step(chunk.size-1, bsize) do |i|
@@ -26,7 +23,7 @@ module ComicWalker
           end
         end
 
-        c = func2(s, key2)
+        c = func2(s, key)
         # s.size == c.size
 
         chunks.each do |chunk|
@@ -34,12 +31,12 @@ module ComicWalker
             chunk[i] = c.shift
           end
         end
-        func3(key1, chunks[0], hsize)
         chunks
       end
 
       # @param [String] key
       # @param [Array<Fixnum>] chunk Encrypted data slice
+      # @param [Integer] hsize header size?
       # @return [nil] Modify the given chunk
       def func3(key, chunk, hsize)
         hsize = [hsize, chunk.size].min
