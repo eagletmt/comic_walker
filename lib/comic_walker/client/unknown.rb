@@ -22,8 +22,8 @@ module ComicWalker
         decrypt_b64(h + A1B, license_b64)
       end
 
-      # Decode Base64-encoded data
-      # @param [String] key key?
+      # Decrypt Base64-encoded data
+      # @param [Array<Fixnum>] key key?
       # @param [String] b64data Base64-encoded data
       # @return [String]
       def decrypt_b64(key, b64data)
@@ -33,10 +33,10 @@ module ComicWalker
         decrypt_data(data[16 .. -1], l)
       end
 
-      # Decode data
+      # Decrypt data
       # @param [Array<Fixnum>] data
       # @param [Array<Fixnum>] key
-      # @return [String] Decoded data
+      # @return [String] Decrypt data
       def decrypt_data(data, key)
         dec = OpenSSL::Cipher.new('RC4')
         dec.decrypt
