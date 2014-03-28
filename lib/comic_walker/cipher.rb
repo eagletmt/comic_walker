@@ -1,6 +1,5 @@
 require 'base64'
 require 'digest'
-require 'openssl'
 
 module ComicWalker
   module Cipher
@@ -28,19 +27,37 @@ module ComicWalker
     def decrypt_b64(key, b64data)
       data = Base64.decode64(b64data)
       md5 = Digest::MD5.hexdigest(key + data.byteslice(8, 8))
-      l = md5.scan(/.{2}/).map { |xy| Integer(xy, 16) }.pack('C*')
-      decrypt_rc4(l, data[16 .. -1])
+      l = md5.scan(/.{2}/).map { |xy| Integer(xy, 16) }
+      decrypt_rc4(l, data[16 .. -1].unpack('C*')).pack('C*')
     end
 
     # Decrypt data
-    # @param [String] key
-    # @param [String] data
-    # @return [String] Decrypt data
+    # @param [Array<Fixnum>] key
+    # @param [Array<Fixnum>] data
+    # @return [Array<Fixnum>] Decrypt data
     def decrypt_rc4(key, data)
-      dec = OpenSSL::Cipher.new('RC4')
-      dec.decrypt
-      dec.key = key
-      dec.update(data) + dec.final
+      s = gen_rc4_table(key)
+      i = 0
+      j = 0
+      data.map do |x|
+        i = (i + 1) & 0xff
+        j = (j + s[i]) & 0xff
+        s[i], s[j] = s[j], s[i]
+        k = s[(s[i] + s[j]) & 0xff]
+        x ^ k
+      end
+    end
+
+    # @param [Array<Fixnum>] key
+    # @return [Array<Fixnum>] RC4 table
+    def gen_rc4_table(key)
+      s = 256.times.to_a
+      j = 0
+      256.times do |i|
+        j = (j + s[i] + key[i % key.size]) & 0xff
+        s[i], s[j] = s[j], s[i]
+      end
+      s
     end
   end
 end

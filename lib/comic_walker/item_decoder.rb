@@ -8,9 +8,9 @@ module ComicWalker
       ct = configuration_pack['ct']
       st = configuration_pack['st']
       et = configuration_pack['et']
-      @key1 = ct + st + fname
-      @key2 = ct + fname + et
-      @key3 = fname + st + et
+      @key1 = (ct + st + fname).unpack('C*')
+      @key2 = (ct + fname + et).unpack('C*')
+      @key3 = (fname + st + et).unpack('C*')
     end
 
     def decode(dat_path, img_path, b64data)

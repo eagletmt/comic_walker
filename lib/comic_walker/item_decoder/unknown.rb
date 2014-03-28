@@ -1,9 +1,11 @@
+require 'comic_walker/cipher'
+
 module ComicWalker
   class ItemDecoder
     module Unknown
       module_function
 
-      # @param [String] key
+      # @param [Array<Fixnum>] key
       # @param [Array<Fixnum>] data Encrypted data
       # @param [Integer] bsize block size?
       # @return [Array<Fixnum>] Chunked decrypted data
@@ -13,7 +15,7 @@ module ComicWalker
           s << data[i]
         end
 
-        c = func2(key, s)
+        c = Cipher.decrypt_rc4(key, s)
         # s.size == c.size
 
         0.step(data.size-1, bsize) do |i|
@@ -22,62 +24,25 @@ module ComicWalker
         data
       end
 
-      # @param [String] key
+      # @param [Array<Fixnum>] key
       # @param [Array<Fixnum>] data Encrypted data
       # @param [Integer] hsize header size?
       # @return [nil] Modify the given data
       def func3(key, data, hsize)
         hsize = [hsize, data.size].min
-        func2(key, data.slice(0, hsize)).each.with_index do |x, i|
+        Cipher.decrypt_rc4(key, data.slice(0, hsize)).each.with_index do |x, i|
           data[i] = x
         end
       end
 
-      # @param [String] key
-      # @param [Array<Fixnum>] data
-      # @return [Array<Fixnum>]
-      def func2(key, data)
-        # RC4?
-        tbl = gen_table(key)
-        i = 0
-        j = 0
-        data.map do |x|
-          i = (i + 1) % 256
-          j = (j + tbl[i]) % 256
-          tbl[i], tbl[j] = tbl[j], tbl[i]
-          c = (tbl[i] + tbl[j]) % 256
-          x ^ tbl[c]
-        end
-      end
-
-      # @param [String] key key?
+      # @param [Array<Fixnum>] key
       # @param [Array<Fixnum>] data Encrypted data
       # @return [Array<Fixnum>]
       def func1(key, data)
-        d = gen_table(key)
+        s = Cipher.gen_rc4_table(key)
         data.map.with_index do |b, i|
-          b ^ d[i % 256]
+          b ^ s[i % 256]
         end
-      end
-
-      # @param [String] key key?
-      # @return [Array<Fixnum>] Some table
-      def gen_table(key)
-        key = key.unpack('C*')
-        e = []
-        d = []
-        256.times do |b|
-          e[b] = b
-        end
-        256.times do |b|
-          d[b] = key[b % key.size]
-        end
-        a = 0
-        256.times do |b|
-          a = (a + e[b] + d[b]) % 256
-          e[b], e[a] = e[a], e[b]
-        end
-        e
       end
 
       # Calculate moves.
