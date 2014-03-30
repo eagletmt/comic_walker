@@ -20,9 +20,9 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
+  spec.add_development_dependency "yard"
   spec.add_dependency "addressable"
   spec.add_dependency "http-cookie"
   spec.add_dependency "rmagick"
   spec.add_dependency "rubyzip"
-  spec.add_dependency "yard"
 end
