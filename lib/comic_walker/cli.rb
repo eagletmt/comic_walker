@@ -1,18 +1,24 @@
 require 'json'
 require 'pathname'
 require 'pp'
+require 'thor'
 require 'comic_walker/client'
 require 'comic_walker/end_layer_decoder'
 require 'comic_walker/item_decoder'
 
 module ComicWalker
-  class CLI
-    def run(cids)
+  class CLI < Thor
+    package_name 'comic_walker'
+
+    desc 'save CID1 CID2...', 'Save contents'
+    def save(*cids)
       client = Client.new
       cids.each do |cid|
         save_content(client, cid)
       end
     end
+
+    private
 
     def save_content(client, cid)
       license = client.get_license(cid)

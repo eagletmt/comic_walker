@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
 require 'comic_walker/cli'
 
-ComicWalker::CLI.new.run(ARGV)
+ComicWalker::CLI.start(ARGV)
