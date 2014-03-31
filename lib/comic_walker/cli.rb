@@ -41,7 +41,7 @@ module ComicWalker
       end
       save_cookies(jar)
 
-      json['contents'].each do |content|
+      json['contents'].sort_by { |content| Time.parse(content['updated_at']) }.reverse_each do |content|
         next unless content.has_key?('sub_contents')
         puts "#{content['name']} http://comic-walker.com/contents/detail/#{content['content_id']}"
         puts "  Updated: #{format_time(content['updated_at'])}"
