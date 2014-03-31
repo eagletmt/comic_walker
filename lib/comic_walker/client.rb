@@ -11,9 +11,21 @@ module ComicWalker
       @bid = '000000000000000000000NFBR'
     end
 
+    class Error < StandardError
+      attr_reader :code, :reason
+      def initialize(code, reason)
+        super("#{code}: #{reason}")
+        @code = code
+        @reason = reason
+      end
+    end
+
     def get_license(cid)
       u1 = get_u1(cid)
       json = get_li(cid, u1)
+      if error = json['error']
+        raise Error.new(error['code'], error['message'])
+      end
       license_b64 = json['license']
       License.new(JSON.parse(Cipher.decrypt_license(@bid, u1, license_b64)))
     end
