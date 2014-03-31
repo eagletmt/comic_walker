@@ -24,6 +24,15 @@ module ComicWalker
       end
     end
 
+    desc 'save-all CID1 CID2...', 'Save all sub-contents'
+    def save_all(*parent_cids)
+      jar = HTTP::CookieJar.new
+      load_cookies(jar)
+      child_cids = find_sub_contents(V1::Client.new(jar, load_uuid), parent_cids)
+      save_cookies(jar)
+      save(*child_cids)
+    end
+
     desc 'contents', 'List contents'
     option :page,
       desc: 'Page',
@@ -127,6 +136,33 @@ module ComicWalker
 
     def format_time(str)
       Time.parse(str).strftime('%F %X')
+    end
+
+    def find_sub_contents(client, parent_cids)
+      page = 1
+      per_page = 200
+      child_cids = {}
+      client.start do
+        until child_cids.size == parent_cids do
+          json = client.contents(page: page, per_page: per_page)
+          contents = json['contents']
+          if contents.empty?
+            break
+          end
+          contents.each do |c|
+            if parent_cids.include?(c['content_id'])
+              child_cids[c['content_id']] = c['sub_contents']
+            end
+          end
+          page += 1
+        end
+      end
+      parent_cids.each do |cid|
+        unless child_cids.has_key?(cid)
+          $stderr.puts "No such content: #{cid}"
+        end
+      end
+      child_cids.values.flatten
     end
   end
 end
