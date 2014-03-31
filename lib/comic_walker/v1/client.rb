@@ -25,22 +25,35 @@ module ComicWalker
       AID = 'KDCWI_JP'
       AVER = '1.2.0'
 
+      class UnknownDeviceError < StandardError
+      end
+      class NoValidSessionError < StandardError
+      end
+
       def create_session
         retried = 0
-        loop do
+        begin
           res = post('/user_sessions/create', {
             DID: @uuid,
             PIN: @uuid,
             AID: AID,
             AVER: AVER,
           })
-          if retried == 0 && res.body == 'UnknownDeviceError'
+          case res.body
+          when 'UnknownDeviceError'
+            raise UnknownDeviceError.new
+          when 'ValidSessionExistsError'
+            nil
+          else
+            JSON.parse(res.body)
+          end
+        rescue UnknownDeviceError => e
+          if retried == 0
             retried += 1
             create_user
-          elsif res.body == 'ValidSessionExistsError'
-            return nil
+            retry
           else
-            return JSON.parse(res.body)
+            raise e
           end
         end
       end
@@ -67,13 +80,21 @@ module ComicWalker
           languages: 'ja',
         }.merge(params)
 
-        loop do
+        begin
           res = get('/v1/contents', params)
-          if retried == 0 && res.body == 'NoValidSessionError'
-            retried += 1
-            create_session(load_uuid)
+          case res.body
+          when 'NoValidSessionError'
+            raise NoValidSessionError.new
           else
-            return JSON.parse(res.body)
+            JSON.parse(res.body)
+          end
+        rescue NoValidSessionError => e
+          if retried == 0
+            retried += 1
+            create_session
+            retry
+          else
+            raise e
           end
         end
       end
