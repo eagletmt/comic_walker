@@ -91,7 +91,11 @@ module ComicWalker
               pages[content['index']-1] = content['file']
             end
           when /end_layer\.json/
-            pp EndLayerDecoder.new(license.key).decode(zip.read)
+            begin
+              pp EndLayerDecoder.new(license.key).decode(zip.read)
+            rescue JSON::ParserError
+              $stderr.puts "WARNING: #{cid}: Could not decode end_layer.json.enc"
+            end
           when %r{\Aitem/}
             items[entry.name] = zip.read
           end
