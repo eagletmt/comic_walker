@@ -87,9 +87,6 @@ module ComicWalker
           when 'configuration_pack.json'
             config = JSON.parse(zip.read)
             decoder = ItemDecoder.new(config)
-            config['configuration']['contents'].each do |content|
-              pages[content['index']-1] = content['file']
-            end
           when /end_layer\.json/
             begin
               pp EndLayerDecoder.new(license.key).decode(zip.read)
@@ -102,13 +99,13 @@ module ComicWalker
         end
 
         img_dir = Pathname.new(title).join(cid).tap(&:mkpath)
-        pages.each.with_index do |file, i|
+        decoder.pages.each.with_index do |file, i|
           dat_path = Pathname.new(file).join('0.dat')
           data = items[dat_path.to_s]
           img_fname = dat_path.parent.basename.sub_ext('.jpg')
           img_path = img_dir.join(sprintf('%03d_%s', i, img_fname))
           puts "#{dat_path} -> #{img_path}"
-          decoder.decode(dat_path, img_path, data)
+          decoder.decode(file, dat_path, img_path, data)
         end
       end
     end
