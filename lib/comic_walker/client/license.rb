@@ -1,12 +1,13 @@
-require 'addressable/uri'
+require 'uri'
 require 'base64'
-require 'net/http'
+require 'net/http/persistent'
 
 module ComicWalker
   class Client
     class License
       def initialize(json)
         @json = json
+        @http = Net::HTTP::Persistent.new('comic_walker')
       end
 
       def agreement
@@ -21,26 +22,26 @@ module ComicWalker
         agreement['url_prefix']
       end
 
+      CONFIGURATION_PACK_FILENAME = 'configuration_pack.json'
+
+      def configuration_pack_url
+        url_prefix + CONFIGURATION_PACK_FILENAME
+      end
+
+      def get(url)
+        @http.request(URI.parse(url))
+      end
+
       def get_configuration_pack
-        uri = Addressable::URI.parse(url_prefix + 'configuration_pack.json')
-        Net::HTTP.start(uri.host) do |http|
-          JSON.parse(http.get(uri.request_uri).body)
-        end
+        JSON.parse(get(configuration_pack_url).body)
       end
 
       def get_info
-        uri = Addressable::URI.parse(info_url)
-        body = Net::HTTP.start(uri.host) do |http|
-          http.get(uri.request_uri).body
-        end
-        JSON.parse(body)
+        JSON.parse(get(info_url).body)
       end
 
       def get_jpeg(file)
-        uri = Addressable::URI.parse(url_prefix + file + '/0.jpeg')
-        Net::HTTP.start(uri.host) do |http|
-          http.get(uri.request_uri).body
-        end
+        get(url_prefix + file + '/0.jpeg').body
       end
     end
   end
