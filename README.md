@@ -1,5 +1,6 @@
 # ComicWalker
 [![Gem Version](https://badge.fury.io/rb/comic_walker.svg)](http://badge.fury.io/rb/comic_walker)
+[![Code Climate](https://codeclimate.com/github/eagletmt/comic_walker.png)](https://codeclimate.com/github/eagletmt/comic_walker)
 
 Client library for [ComicWalker](http://comic-walker.com/).
 
