@@ -5,11 +5,15 @@ module ComicWalker
   class ItemDecoder
     attr_reader :pages
 
+    DEFAULT_CT = '20000101000000'
+    DEFAULT_ST = '20000101000000'
+    DEFAULT_ET = '99991231235959'
+
     def initialize(configuration_pack)
       fname = '0.dat'
-      ct = configuration_pack['ct']
-      st = configuration_pack['st']
-      et = configuration_pack['et']
+      ct = configuration_pack['ct'] || DEFAULT_CT
+      st = configuration_pack['st'] || DEFAULT_ST
+      et = configuration_pack['et'] || DEFAULT_ET
       @key1 = (ct + st + fname).unpack('C*')
       @key2 = (ct + fname + et).unpack('C*')
       @key3 = (fname + st + et).unpack('C*')
@@ -23,7 +27,7 @@ module ComicWalker
       end
     end
 
-    def decode(file, dat_path, img_path, b64data)
+    def decode_b64(file, dat_path, img_path, b64data)
       bs = 128
       hs = 1024
       blob = Unknown.finish(@key1, hs,
@@ -33,7 +37,10 @@ module ComicWalker
           )
         )
       ).pack('C*')
+      decode(file, dat_path, img_path, blob)
+    end
 
+    def decode(file, dat_path, img_path, blob)
       src = Magick::Image.from_blob(blob).first
       width = src.columns
       height = src.rows

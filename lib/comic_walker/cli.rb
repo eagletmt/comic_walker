@@ -101,11 +101,15 @@ module ComicWalker
         img_dir = Pathname.new(title).join(cid).tap(&:mkpath)
         decoder.pages.each.with_index do |file, i|
           dat_path = Pathname.new(file).join('0.dat')
-          data = items[dat_path.to_s]
           img_fname = dat_path.parent.basename.sub_ext('.jpg')
           img_path = img_dir.join(sprintf('%03d_%s', i, img_fname))
+
+          if data = items[dat_path.to_s]
+            decoder.decode_b64(file, dat_path, img_path, data)
+          else
+            decoder.decode(file, dat_path, img_path, license.get_jpeg(file))
+          end
           puts "#{dat_path} -> #{img_path}"
-          decoder.decode(file, dat_path, img_path, data)
         end
       end
     end

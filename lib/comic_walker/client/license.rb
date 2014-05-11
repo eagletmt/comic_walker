@@ -15,11 +15,15 @@ module ComicWalker
       end
 
       def jar_url
-        agreement['url_prefix'] + agreement['jar_file_name']
+        url_prefix + agreement['jar_file_name']
       end
 
       def info_url
-        agreement['url_prefix'] + agreement['info_file_name']
+        url_prefix + agreement['info_file_name']
+      end
+
+      def url_prefix
+        agreement['url_prefix']
       end
 
       def key
@@ -40,6 +44,13 @@ module ComicWalker
           http.get(uri.request_uri).body
         end
         JSON.parse(body)
+      end
+
+      def get_jpeg(file)
+        uri = Addressable::URI.parse(url_prefix + file + '/0.jpeg')
+        Net::HTTP.start(uri.host) do |http|
+          http.get(uri.request_uri).body
+        end
       end
     end
   end
