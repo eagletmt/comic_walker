@@ -1,3 +1,9 @@
+# 0.3.0 (2014-05-12)
+- Download configuration_pack and images directly
+    - Drop jar file download
+    - Drop base64-encoded image decoder
+    - Many internal method changes
+
 # 0.2.2 (2014-05-11)
 - Fix image fetch errors for recent comics
 
