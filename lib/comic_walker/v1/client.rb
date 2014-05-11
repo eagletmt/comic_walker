@@ -2,6 +2,7 @@ require 'addressable/uri'
 require 'http-cookie'
 require 'json'
 require 'net/http'
+require 'retryable'
 
 module ComicWalker
   module V1
@@ -31,8 +32,8 @@ module ComicWalker
       end
 
       def create_session
-        retried = 0
-        begin
+        on_exception = lambda { |exception| create_user }
+        retryable(tries: 2, on: UnknownDeviceError, sleep: 0, exception_cb: on_exception) do
           res = post('/user_sessions/create', {
             DID: @uuid,
             PIN: @uuid,
@@ -47,14 +48,6 @@ module ComicWalker
           else
             JSON.parse(res.body)
           end
-        rescue UnknownDeviceError => e
-          if retried == 0
-            retried += 1
-            create_user
-            retry
-          else
-            raise e
-          end
         end
       end
 
@@ -68,7 +61,6 @@ module ComicWalker
       end
 
       def contents(params = {})
-        retried = 0
         params = {
           AID: AID,
           AVER: AVER,
@@ -80,21 +72,14 @@ module ComicWalker
           languages: 'ja',
         }.merge(params)
 
-        begin
+        on_exception = lambda { |exception| create_session }
+        retryable(tries: 2, on: NoValidSessionError, sleep: 0, exception_cb: on_exception) do
           res = get('/v1/contents', params)
           case res.body
           when 'NoValidSessionError'
             raise NoValidSessionError.new
           else
             JSON.parse(res.body)
-          end
-        rescue NoValidSessionError => e
-          if retried == 0
-            retried += 1
-            create_session
-            retry
-          else
-            raise e
           end
         end
       end
