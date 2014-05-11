@@ -1,8 +1,9 @@
 require 'addressable/uri'
 require 'http-cookie'
 require 'json'
-require 'net/http'
+require 'net/http/persistent'
 require 'retryable'
+require 'uri'
 
 module ComicWalker
   module V1
@@ -10,17 +11,9 @@ module ComicWalker
       BASE_URI = Addressable::URI.parse("https://cnts.comic-walker.com")
 
       def initialize(jar, uuid)
-        @https = Net::HTTP.new(BASE_URI.host, 443)
-        @https.use_ssl = true
-        @https.verify_mode = OpenSSL::SSL::VERIFY_PEER
+        @https = Net::HTTP::Persistent.new('comic_walker')
         @jar = jar
         @uuid = uuid
-      end
-
-      def start(&block)
-        @https.start do
-          block.call
-        end
       end
 
       AID = 'KDCWI_JP'
@@ -102,7 +95,7 @@ module ComicWalker
 
       def request_with_cookie(uri, req)
         req['cookie'] = HTTP::Cookie.cookie_value(@jar.cookies(uri.to_s))
-        @https.request(req).tap do |res|
+        @https.request(URI.parse(uri.to_s), req).tap do |res|
           @jar.parse(res['set-cookie'], uri.to_s)
         end
       end

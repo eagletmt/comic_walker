@@ -45,9 +45,7 @@ module ComicWalker
       jar = HTTP::CookieJar.new
       load_cookies(jar)
       client = V1::Client.new(jar, load_uuid)
-      json = client.start do
-        client.contents(per_page: options[:per_page], page: options[:page])
-      end
+      json = client.contents(per_page: options[:per_page], page: options[:page])
       save_cookies(jar)
 
       json['contents'].sort_by { |content| Time.parse(content['updated_at']) }.reverse_each do |content|
@@ -105,20 +103,18 @@ module ComicWalker
       page = 1
       per_page = 200
       child_cids = {}
-      client.start do
-        until child_cids.size == parent_cids do
-          json = client.contents(page: page, per_page: per_page)
-          contents = json['contents']
-          if contents.empty?
-            break
-          end
-          contents.each do |c|
-            if parent_cids.include?(c['content_id'])
-              child_cids[c['content_id']] = c['sub_contents']
-            end
-          end
-          page += 1
+      until child_cids.size == parent_cids do
+        json = client.contents(page: page, per_page: per_page)
+        contents = json['contents']
+        if contents.empty?
+          break
         end
+        contents.each do |c|
+          if parent_cids.include?(c['content_id'])
+            child_cids[c['content_id']] = c['sub_contents']
+          end
+        end
+        page += 1
       end
       parent_cids.each do |cid|
         unless child_cids.has_key?(cid)
