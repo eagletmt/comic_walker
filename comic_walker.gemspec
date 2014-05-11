@@ -24,6 +24,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "addressable"
   spec.add_dependency "http-cookie"
   spec.add_dependency "rmagick"
-  spec.add_dependency "rubyzip"
   spec.add_dependency "thor"
 end

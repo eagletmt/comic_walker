@@ -5,7 +5,6 @@ require 'thor'
 require 'yaml'
 require 'comic_walker/client'
 require 'comic_walker/content_downloader'
-require 'comic_walker/end_layer_decoder'
 require 'comic_walker/item_decoder'
 require 'comic_walker/v1/client'
 
