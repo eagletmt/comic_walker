@@ -13,7 +13,11 @@ module ComicWalker
         dat_path = Pathname.new(file).join('0.dat')
         img_fname = dat_path.parent.basename.sub_ext('.jpg')
         img_path = img_dir.join(sprintf('%03d_%s', i, img_fname))
-        decoder.decode(file, dat_path, img_path, license.get_jpeg(file))
+        if decoder.has_keys?
+          decoder.decode_b64(file, dat_path, img_path, license.get_dat(file))
+        else
+          decoder.decode(file, dat_path, img_path, license.get_jpeg(file))
+        end
         puts "#{dat_path} -> #{img_path}"
       end
     end

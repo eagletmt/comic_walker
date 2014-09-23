@@ -43,6 +43,10 @@ module ComicWalker
       def get_jpeg(file)
         get(url_prefix + file + '/0.jpeg').body
       end
+
+      def get_dat(file)
+        get(url_prefix + file + '/0.dat').body
+      end
     end
   end
 end

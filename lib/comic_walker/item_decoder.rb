@@ -6,6 +6,15 @@ module ComicWalker
     attr_reader :pages
 
     def initialize(configuration_pack)
+      fname = '0.dat'
+      ct = configuration_pack['ct']
+      st = configuration_pack['st']
+      et = configuration_pack['et']
+      if ct && st && et
+        @key1 = (ct + st + fname).unpack('C*')
+        @key2 = (ct + fname + et).unpack('C*')
+        @key3 = (fname + st + et).unpack('C*')
+      end
       @pages = []
       configuration_pack['configuration']['contents'].each do |content|
         pages[content['index']-1] = content['file']
@@ -14,6 +23,23 @@ module ComicWalker
       @pages.each do |file|
         @file_info[file] = configuration_pack[file]
       end
+    end
+
+    def has_keys?
+      !!@key1
+    end
+
+    def decode_b64(file, dat_path, img_path, b64data)
+      bs = 128
+      hs = 1024
+      blob = Unknown.finish(
+        @key1, hs,
+        Unknown.decrypt(
+          @key2, bs,
+          Unknown.prepare(@key3, Base64.decode64(b64data).unpack('C*'))
+        )
+      ).pack('C*')
+      decode(file, dat_path, img_path, blob)
     end
 
     def decode(file, dat_path, img_path, blob)
