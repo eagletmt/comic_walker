@@ -34,7 +34,12 @@ module ComicWalker
       uri = Addressable::URI.parse("http://comic-walker.com/viewer/?cid=#{cid}")
       Net::HTTP.start(uri.host, 80) do |http|
         res = http.get(uri.request_uri)
-        Addressable::URI.unescape(HTTP::Cookie.cookie_value_to_hash(res['set-cookie'])['u1'])
+        if set_cookie = res['set-cookie']
+          u1 = HTTP::Cookie.cookie_value_to_hash(set_cookie)['u1']
+          if u1
+            Addressable::URI.unescape(u1)
+          end
+        end
       end
     end
 
