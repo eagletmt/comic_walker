@@ -31,7 +31,7 @@ module ComicWalker
     end
 
     def get_u1(cid)
-      uri = Addressable::URI.parse("http://comic-walker.com/viewer/?cid=#{cid}")
+      uri = Addressable::URI.parse("http://comic-walker.com/viewer/?tw=2&dlcl=ja&cid=#{cid}")
       Net::HTTP.start(uri.host, 80) do |http|
         res = http.get(uri.request_uri)
         if set_cookie = res['set-cookie']
