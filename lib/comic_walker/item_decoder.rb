@@ -1,4 +1,4 @@
-require 'RMagick'
+require 'rmagick'
 require 'comic_walker/item_decoder/unknown'
 
 module ComicWalker
