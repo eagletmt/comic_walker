@@ -1,3 +1,7 @@
+# 0.4.0 (2015-12-19)
+- Fix save command for site renewal
+    - https://github.com/eagletmt/comic_walker/issues/6
+
 # 0.3.0 (2014-05-12)
 - Download configuration_pack and images directly
     - Drop jar file download
