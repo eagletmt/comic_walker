@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "addressable"
   spec.add_dependency "http-cookie"
   spec.add_dependency "net-http-persistent"
-  spec.add_dependency "retryable"
+  spec.add_dependency "retryable", ">= 2.0.0"
   spec.add_dependency "rmagick"
   spec.add_dependency "thor"
 end

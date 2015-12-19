@@ -26,7 +26,7 @@ module ComicWalker
 
       def create_session
         on_exception = lambda { |exception| create_user }
-        retryable(tries: 2, on: UnknownDeviceError, sleep: 0, exception_cb: on_exception) do
+        Retryable.retryable(tries: 2, on: UnknownDeviceError, sleep: 0, exception_cb: on_exception) do
           res = post('/user_sessions/create', {
             DID: @uuid,
             PIN: @uuid,
@@ -66,7 +66,7 @@ module ComicWalker
         }.merge(params)
 
         on_exception = lambda { |exception| create_session }
-        retryable(tries: 2, on: NoValidSessionError, sleep: 0, exception_cb: on_exception) do
+        Retryable.retryable(tries: 2, on: NoValidSessionError, sleep: 0, exception_cb: on_exception) do
           res = get('/v1/contents', params)
           case res.body
           when 'NoValidSessionError'
